@@ -1,9 +1,11 @@
 from typing import Union
-
-from fastapi import FastAPI
+import io
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.post("/detect/")
+async def detect(file: UploadFile = File(...)):
+    img = await file.read()
+    return StreamingResponse(io.BytesIO(img), media_type="image/png")
