@@ -11,7 +11,7 @@ app = FastAPI()
  物体検出
 """
 @app.post("/detect/")
-async def detect(img: UploadFile = File(...), threshold :float = 0.25):
+async def detect(img: UploadFile = File(...), threshold: float = 0.25):
     # 画像のロード
     image = Image.open(img.file)
     image = image.convert("RGB")
@@ -24,7 +24,7 @@ async def detect(img: UploadFile = File(...), threshold :float = 0.25):
     response.seek(0)
 
     return StreamingResponse(response, media_type="image/jpeg")
-    
+
 
 def _object_detection(image, threshold):
     # 物体検出
