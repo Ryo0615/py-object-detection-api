@@ -11,12 +11,12 @@ app = FastAPI()
  物体検出
 """
 @app.post("/detect/")
-async def detect(img: UploadFile = File(...)):
+async def detect(img: UploadFile = File(...), threshold :float = 0.25):
     # 画像のロード
     image = Image.open(img.file)
 
     # 予測と描画
-    image = _object_detection(image)
+    image = _object_detection(image, threshold)
 
     response = BytesIO()
     image.save(response, "JPEG")
@@ -25,7 +25,7 @@ async def detect(img: UploadFile = File(...)):
     return StreamingResponse(response, media_type="image/jpeg")
     
 
-def _object_detection(image):
+def _object_detection(image, threshold):
     # 物体検出
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
     pred = model(image)
@@ -40,9 +40,10 @@ def _object_detection(image):
             bbox = [int(x) for x in detection[:4].tolist()]
             conf = float(detection[4])
         
-            color = cmap(i, bytes=True)
-            draw = ImageDraw.Draw(image)
-            draw.rectangle(bbox, outline=color, width=3)
-            draw.text([bbox[0], bbox[1]-20], class_name, fill=color)
+            if conf >= threshold:
+                color = cmap(i, bytes=True)
+                draw = ImageDraw.Draw(image)
+                draw.rectangle(bbox, outline=color, width=3)
+                draw.text([bbox[0], bbox[1]-20], class_name, fill=color)
 
     return image
