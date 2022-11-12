@@ -14,6 +14,7 @@ app = FastAPI()
 async def detect(img: UploadFile = File(...), threshold :float = 0.25):
     # 画像のロード
     image = Image.open(img.file)
+    image = image.convert("RGB")
 
     # 予測と描画
     image = _object_detection(image, threshold)
@@ -39,7 +40,7 @@ def _object_detection(image, threshold):
             class_name = str(model.model.names[int(detection[5])])
             bbox = [int(x) for x in detection[:4].tolist()]
             conf = float(detection[4])
-        
+            # 閾値以上のconfidenceの場合のみ描画
             if conf >= threshold:
                 color = cmap(i, bytes=True)
                 draw = ImageDraw.Draw(image)
