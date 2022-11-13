@@ -45,6 +45,6 @@ def _object_detection(image, threshold):
                 color = cmap(i, bytes=True)
                 draw = ImageDraw.Draw(image)
                 draw.rectangle(bbox, outline=color, width=3)
-                draw.text([bbox[0], bbox[1]-20], class_name, fill=color)
+                draw.text([bbox[0]+5, bbox[1]+10], class_name, fill=color)
 
     return image
