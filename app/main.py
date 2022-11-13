@@ -8,7 +8,7 @@ import torch
 app = FastAPI()
 
 """
- 物体検出
+ 物体検出API
 """
 @app.post("/detect/")
 async def detect(img: UploadFile = File(...), threshold: float = 0.25):
@@ -28,7 +28,7 @@ async def detect(img: UploadFile = File(...), threshold: float = 0.25):
 
 def _object_detection(image, threshold):
     # 物体検出
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+    model = torch.hub.load("ultralytics/yolov5", "yolov5s", pretrained=True)
     pred = model(image)
 
     # 検出結果の描画
