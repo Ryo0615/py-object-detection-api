@@ -10,6 +10,8 @@ app = FastAPI()
 """
  物体検出API
 """
+
+
 @app.post("/detect/")
 async def detect(img: UploadFile = File(...), threshold: float = 0.25):
     # 画像のロード
