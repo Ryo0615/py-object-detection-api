@@ -11,9 +11,14 @@ app = FastAPI()
  物体検出API
 """
 
+# ヘルスチェック
+@app.get("/")
+def read_root():
+    return {"Status": "OK"}
 
+# 物体検出
 @app.post("/detect/")
-async def detect(img: UploadFile = File(...), threshold: float = 0.25):
+def detect(img: UploadFile = File(...), threshold: float = 0.25):
     # 画像のロード
     image = Image.open(img.file)
     image = image.convert("RGB")
