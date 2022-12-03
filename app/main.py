@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from matplotlib import pyplot as plt
 from io import BytesIO
 import torch
@@ -12,11 +12,15 @@ app = FastAPI()
 """
 
 # ヘルスチェック
+
+
 @app.get("/")
 def read_root():
     return {"Status": "OK"}
 
 # 物体検出
+
+
 @app.post("/detect/")
 def detect(img: UploadFile = File(...), threshold: float = 0.25):
     # 画像のロード
@@ -38,18 +42,19 @@ def _object_detection(image, threshold):
     model = torch.hub.load("ultralytics/yolov5", "yolov5s", pretrained=True)
     pred = model(image)
 
+    # 色の一覧を作成
+    cmap = plt.cm.get_cmap("hsv", len(model.model.names))
+
     # 検出結果の描画
     for detections in pred.xyxy:
-        # 色の一覧を作成
-        cmap = plt.cm.get_cmap("hsv", len(detections) + 1)
-
-        for i, detection in enumerate(detections):
-            class_name = str(model.model.names[int(detection[5])])
+        for detection in detections:
+            class_id = int(detection[5])
+            class_name = str(model.model.names[class_id])
             bbox = [int(x) for x in detection[:4].tolist()]
             conf = float(detection[4])
             # 閾値以上のconfidenceの場合のみ描画
             if conf >= threshold:
-                color = cmap(i, bytes=True)
+                color = cmap(class_id, bytes=True)
                 draw = ImageDraw.Draw(image)
                 draw.rectangle(bbox, outline=color, width=3)
                 draw.text([bbox[0]+5, bbox[1]+10], class_name, fill=color)
