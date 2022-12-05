@@ -4,6 +4,8 @@ from PIL import Image, ImageDraw, ImageFont
 from matplotlib import pyplot as plt
 from io import BytesIO
 import torch
+import requests
+import io
 
 app = FastAPI()
 
@@ -45,6 +47,12 @@ def _object_detection(image, threshold):
     # 色の一覧を作成
     cmap = plt.cm.get_cmap("hsv", len(model.model.names))
 
+    # フォント設定
+    truetype_url = 'https://github.com/JotJunior/PHP-Boleto-ZF2/blob/master/public/assets/fonts/arial.ttf?raw=true'
+    r = requests.get(truetype_url, allow_redirects=True)
+    size = int(image.size[0]*0.02)
+    font = ImageFont.truetype(io.BytesIO(r.content), size=size)
+
     # 検出結果の描画
     for detections in pred.xyxy:
         for detection in detections:
@@ -57,6 +65,6 @@ def _object_detection(image, threshold):
                 color = cmap(class_id, bytes=True)
                 draw = ImageDraw.Draw(image)
                 draw.rectangle(bbox, outline=color, width=3)
-                draw.text([bbox[0]+5, bbox[1]+10], class_name, fill=color)
+                draw.text([bbox[0]+5, bbox[1]+10], class_name, fill=color, font=font)
 
     return image
